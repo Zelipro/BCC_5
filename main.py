@@ -895,7 +895,7 @@ class BCC(MDApp):
         
         dic = {
             self.Liste[0]: self.Changer_language,
-            self.Liste[1]: None,
+            self.Liste[1]: self.Help,
             self.Liste[2]: self.Changer_font1,
             self.Liste[3]: self.Changer_font2,
             self.Liste[4]:self.Changer_show_page4,
@@ -909,6 +909,91 @@ class BCC(MDApp):
         self.Operation3.dismiss()
         self.INSTANCE.icon = "plus"
 
+
+    def Help(self,instance):
+        Box = MDBoxLayout(
+            orientation = "vertical",
+            adaptive_height = True,
+            spacing = 30,
+            padding = 10
+        )
+
+        Card = MDCard(
+            radius = [110],
+            size_hint = (None,None),
+            size = (215,215),
+            pos_hint = {"center_x":.5,"center_y":.5},
+            md_bg_color = [1,1,0,1]
+
+        )
+
+        Img = Image(
+            source = "My_Image.png",
+            #size_hint = (None,None),
+            #size = (80,80),
+            pos_hint = {"center_x":.5,"center_y":.5}
+
+        )
+
+        Card.add_widget(Img)
+
+        Box.add_widget(Card)
+
+        Text = MDLabel(
+            text = "Elisée ATIKPO",
+            font_style = "H5",
+            halign = "center",
+            theme_text_color = "Primary",
+        )
+
+        Box.add_widget(Text)
+
+        Text2 = MDLabel(
+            text = "[b]Contact:[/b] +228 96 44 40 55",
+            markup = True,
+            font_style = "H6",
+            theme_text_color = "Secondary",
+        )
+
+        Box.add_widget(Text2)
+
+        Text3 = MDLabel(
+            text = "[b]Mail:[/b] eliseeatikpo10@gmail.com",
+            markup = True,
+            font_style = "H6",
+            theme_text_color = "Secondary",
+        )
+
+        Box.add_widget(Text3)
+
+        Text4 = MDLabel(
+            text = "Dieu Est Grand",
+            markup = True,
+            font_style = "Subtitle1",
+            halign = "center",
+        )
+
+        Box.add_widget(Text4)
+
+        self.MD_Help = MDDialog(
+            title = "Aide/Help",
+            type = "custom",
+            content_cls = Box,
+            buttons = [
+                MDFlatButton(
+                    text = "FERMER",
+                    theme_text_color = "Custom",
+                    text_color = (.2,.6,1,1),
+                    on_release = self.Close_help,
+                )
+            ]
+        )
+        
+        self.MD_Help.open()
+    
+    def Close_help(self,instance):
+        self.MD_Help.dismiss()
+        
     def Afficher_moi_les_infos_en_card(self,Lieu,data):
         Lieu.orientation =  'vertical'
         Lieu.padding="16dp"
@@ -1041,7 +1126,7 @@ class BCC(MDApp):
         
         dic = {
             self.Liste[0]: self.Changer_language,
-            self.Liste[1]: None,
+            self.Liste[1]: self.Help,
             self.Liste[2]: self.Changer_font1,
             self.Liste[-1]: self.Changer_font2
         }

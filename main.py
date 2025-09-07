@@ -929,8 +929,6 @@ class BCC(MDApp):
 
         Img = Image(
             source = "My_Image.png",
-            #size_hint = (None,None),
-            #size = (80,80),
             pos_hint = {"center_x":.5,"center_y":.5}
 
         )

@@ -1,0 +1,189 @@
+<Page1>:
+    md_bg_color: [1,1,0,1]
+    name:"Page1"
+    
+    MDRectangleFlatButton:
+        text:"[b]fr[/b]"
+        pos_hint:{"center_x":.9 , "center_y":.9}
+        on_release:app.Changer_language(self)
+
+    MDLabel:
+        id:Page1_1
+        text: "LOGICIEL DE CONTRÔLE DU BCC"
+        font_style:"H4"
+        markup:True
+        halign:"center"
+        theme_text_color:"Primary"
+        pos_hint:{"center_y":.7}
+    
+    Image:
+        source: "CEET.png"
+        size_hint:None,None
+        size:(150,150)  # Taille réduite pour éviter de cacher les autres éléments
+        pos_hint:{"center_x":.5,"center_y":.85}
+    
+    MDGridLayout:
+        cols:3
+        pos_hint:{"center_x":.5,"center_y":.4}
+        size_hint: 0.9, None
+        adaptive_height:True
+        spacing: 20
+        padding: 20
+
+        # Carte Sécurisé
+        MDCard:
+            orientation: "vertical"
+            md_bg_color: [.5, .5, 0, 1]  # Fond blanc
+            radius: [15]
+            elevation: 1
+            padding: 15
+            size_hint_y: None
+            height: 160
+            ripple_behavior: True
+            
+            MDBoxLayout:
+                orientation: "vertical"
+                spacing: 10
+                adaptive_height: True
+                
+                Widget:
+                    size_hint_y: None
+                    height: 10
+                
+                MDIcon:
+                    icon: "shield-check"
+                    theme_icon_color: "Custom"
+                    icon_color: [0.2, 0.8, 0.4, 1]
+                    font_size: "32sp"
+                    size_hint_y: None
+                    height: 40
+                    halign: "center"
+                
+                MDLabel:
+                    text: "[b]Sécurisé[/b]"
+                    font_style: "H6"
+                    markup: True
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: [0.2, 0.2, 0.2, 1]
+                    size_hint_y: None
+                    height: 30
+                
+                MDLabel:
+                    text: "Contrôle sécurisé des opérations BCC avec traçabilité"
+                    font_style: "Caption"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: 60
+        
+        # Carte Rapide
+        MDCard:
+            orientation: "vertical"
+            md_bg_color: [.5, .5, 0, 1]  # Fond blanc
+            radius: [15]
+            elevation: 1
+            padding: 15
+            size_hint_y: None
+            height: 160
+            ripple_behavior: True
+            
+            MDBoxLayout:
+                orientation: "vertical"
+                spacing: 10
+                adaptive_height: True
+                
+                Widget:
+                    size_hint_y: None
+                    height: 10
+                
+                MDIcon:
+                    icon: "lightning-bolt"
+                    theme_icon_color: "Custom"
+                    icon_color: [0.3, 0.6, 1, 1]
+                    font_size: "32sp"
+                    size_hint_y: None
+                    height: 40
+                    halign: "center"
+                
+                MDLabel:
+                    text: "[b]Rapide[/b]"
+                    font_style: "H6"
+                    markup: True
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: [0.2, 0.2, 0.2, 1]
+                    size_hint_y: None
+                    height: 30
+                
+                MDLabel:
+                    text: "Interface intuitive pour une saisie et consultation rapide"
+                    font_style: "Caption"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: 60
+        
+        # Carte Professionnel
+        MDCard:
+            orientation: "vertical"
+            md_bg_color: [.5, .5, 0, 1]  # Fond blanc
+            radius: [15]
+            elevation: 1
+            padding: 15
+            size_hint_y: None
+            height: 160
+            ripple_behavior: True
+            
+            MDBoxLayout:
+                orientation: "vertical"
+                spacing: 10
+                adaptive_height: True
+                
+                Widget:
+                    size_hint_y: None
+                    height: 10
+                
+                MDIcon:
+                    icon: "office-building"
+                    theme_icon_color: "Custom"
+                    icon_color: [0.6, 0.4, 1, 1]
+                    font_size: "32sp"
+                    size_hint_y: None
+                    height: 40
+                    halign: "center"
+                
+                MDLabel:
+                    text: "[b]Professionnel[/b]"
+                    font_style: "H6"
+                    markup: True
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: [0.2, 0.2, 0.2, 1]
+                    size_hint_y: None
+                    height: 30
+                
+                MDLabel:
+                    text: "Conforme aux standards CEET-DRM pour un usage professionnel"
+                    font_style: "Caption"
+                    halign: "center"
+                    text_size: self.width, None
+                    size_hint_y: None
+                    height: 60
+    
+    MDLabel:
+        id:Page1_2
+        text: "CEET-DRM-BCC"
+        font_style:"Caption"
+        markup:True
+        halign:"center"
+        pos_hint:{"center_y":.22}
+    
+    MDRaisedButton:
+        id:Page1_3
+        text:"Aller"
+        on_release:app.Go(self)
+        size_hint:.3,.05
+        font_size:30
+        pos_hint:{"center_x":.5,"center_y":.15}
+        md_bg_color: [0.2, 0.6, 1, 1]  # Couleur bleue pour le bouton

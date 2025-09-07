@@ -5,7 +5,7 @@ package.domain = org.ceet.bcc
 source.dir = .
 
 source.include_exts = py,png,jpg,kv,atlas,txt,jpeg,db
-source.include_patterns = Pages/*,*.db,CEET.png
+source.include_patterns = Pages/*,*.db,CEET.png,My_Image.png
 
 version = 1.5
 requirements = python3,kivy,kivymd,pillow

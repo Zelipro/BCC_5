@@ -20,11 +20,10 @@ import sqlite3
 from kivymd.toast import toast
 from kivymd.uix.datatables import MDDataTable
 from kivy.core.window import Window
-from kivy.utils import platform
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.scrollview import MDScrollView
 
-#Window.size = [340,620]
+Window.size = [340,620]
 
 # Écran de chargement personnalisé
 class LoadingScreen(MDScreen):
@@ -142,11 +141,11 @@ class But_styler(MDCard):
             orientation="vertical",
             spacing="10dp",
             size_hint_y=None,
-            height="200dp"
+            height="250dp"
         )
         
         # Styles pour l'affichage dans le dialog
-        styles_dialog = ["H5", "H6", "Subtitle1", "Body1"]
+        styles_dialog = ["H5", "H6", "Subtitle1", "Body1"]+["Body1"]
         
         # Ajouter chaque élément de la liste avec son style
         for i, (info, style) in enumerate(zip(self.Liste, styles_dialog)):
@@ -579,15 +578,12 @@ class BCC(MDApp):
     def __init__(self):
         super().__init__()
         self.Current_lang = "fr"
-    def on_request_close(self, *args):
-        """Gestion de la fermeture de l'app"""
-        return False  # Ne pas fermer automatiquement
-    
+
     def on_start(self):
         #self.root_window.remove_widget(self.root_window.children[0])
         self.con = sqlite3.connect("base.db")
         cur = self.con.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS BCC (id INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, Operator TEXT, O_F_DD TEXT, Operation TEXT, Mension TEXT)")
+        cur.execute("CREATE TABLE IF NOT EXISTS BCC (id INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, Heur TEXT, Operator TEXT, O_F_DD TEXT, Operation TEXT, Mension TEXT)")
         self.con.commit()
         self.DATE = strftime("%D")#Pour la date plus tart dans Page4
         self.PAGE4_Liste = []
@@ -598,24 +594,13 @@ class BCC(MDApp):
 
         #Fin Pour me permettre de faire les changement d'aafichage
 
+        """Configuration au démarrage de l'app"""
+        from kivy.core.window import Window
+        from kivy.utils import platform
         
-        if platform == 'android':
-            from android.permissions import request_permissions, Permission
-            request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
-        
-        # Forcer l'orientation portrait sur tous les appareils
-        Window.rotation = 0
         if platform in ('android', 'ios'):
-            # Configuration mobile spécifique
+            # Configuration mobile
             Window.softinput_mode = 'below_target'
-            # Forcer la taille portrait pour éviter l'orientation paysage
-            Window.size = (360, 640)  # Taille typique portrait
-        else:
-            # Pour le développement sur desktop
-            Window.size = [340, 620]
-        
-        # Bloquer complètement la rotation
-        Window.bind(on_request_close=self.on_request_close)
             
         # Lier l'événement de changement de taille (clavier)
         Window.bind(on_resize=self.on_window_resize)
@@ -772,7 +757,7 @@ class BCC(MDApp):
                 Pge = self.cr.current_screen.ids
                 Liste2 = [Pge.Page3_2,Pge.Page3_3,Pge.Page3_4,Pge.Page3_5,Pge.Page3_6]
                 cur = self.con.cursor()
-                cur.execute("Insert into BCC (Date,Operator,O_F_DD,Operation,Mension) values (?,?,?,?,?)",tuple([elmt.text for elmt in Liste2]))
+                cur.execute("Insert into BCC (Date,Heur,Operator,O_F_DD,Operation,Mension) values (?,?,?,?,?,?)",tuple([Liste2[0].text , str(strftime("%T"))] + [elmt.text for elmt in Liste2[1:]]))
                 self.con.commit()
 
                 toast("Ajout effectué avec succes!")
@@ -855,61 +840,7 @@ class BCC(MDApp):
     def Changer_show_page4(self,instance):
         self.Choix_affichage = "Data" if self.Choix_affichage == "Card" else "Card"
     
-
-
-    def Appui_Icon_page4(self, instance):
-        Pge = self.cr.current_screen.ids
-        Liste = [Pge.Page2_4, Pge.Page2_5, Pge.Page2_6, Pge.Page2_11]
-        Liste = [elmt.text for elmt in Liste] + ["Mode affichage"]
-        self.Liste = Liste
-        Icons = ["web", 'information', "brightness-6", "palette","cog"]
-        
-        Items = []
-        for elmt1, elmt2 in zip(Liste, Icons):
-            Add = {
-                "text": elmt1,
-                "icon": elmt2,
-                # CORRECTION: Utiliser une lambda pour passer les bons arguments
-                "on_release": lambda btn = instance , text=elmt1: self.Faire_Icon_4(btn, text)
-            }
-            Items.append(Add)
-
-        self.INSTANCE = instance
-        
-        self.Operation3 = MDDropdownMenu(
-            caller=instance,
-            items=Items,
-            width_mult=3,
-        )
-        
-        instance.icon = "close"
-        self.Operation3.open()
     
-    def Faire_Icon_4(self, instance,x):
-        """
-        calling_button: Le bouton qui a ouvert le menu
-        menu_item: L'item du menu qui a été cliqué
-        selected_text: Le texte de l'item sélectionné
-        """
-        #x = selected_text  # ou menu_item.text si vous préférez
-        
-        dic = {
-            self.Liste[0]: self.Changer_language,
-            self.Liste[1]: self.Help,
-            self.Liste[2]: self.Changer_font1,
-            self.Liste[3]: self.Changer_font2,
-            self.Liste[4]:self.Changer_show_page4,
-        }
-        
-        func = dic.get(x)
-        if func is not None:
-            func(instance)  # Passer le bouton original
-    
-        # Fermer le menu et remettre l'icône
-        self.Operation3.dismiss()
-        self.INSTANCE.icon = "plus"
-
-
     def Help(self,instance):
         Box = MDBoxLayout(
             orientation = "vertical",
@@ -929,6 +860,8 @@ class BCC(MDApp):
 
         Img = Image(
             source = "My_Image.png",
+            #size_hint = (None,None),
+            #size = (80,80),
             pos_hint = {"center_x":.5,"center_y":.5}
 
         )
@@ -991,7 +924,59 @@ class BCC(MDApp):
     
     def Close_help(self,instance):
         self.MD_Help.dismiss()
+
+    def Appui_Icon_page4(self, instance):
+        Pge = self.cr.current_screen.ids
+        Liste = [Pge.Page2_4, Pge.Page2_5, Pge.Page2_6, Pge.Page2_11]
+        Liste = [elmt.text for elmt in Liste] + ["Mode affichage"]
+        self.Liste = Liste
+        Icons = ["web", 'information', "brightness-6", "palette","cog"]
         
+        Items = []
+        for elmt1, elmt2 in zip(Liste, Icons):
+            Add = {
+                "text": elmt1,
+                "icon": elmt2,
+                # CORRECTION: Utiliser une lambda pour passer les bons arguments
+                "on_release": lambda btn = instance , text=elmt1: self.Faire_Icon_4(btn, text)
+            }
+            Items.append(Add)
+
+        self.INSTANCE = instance
+        
+        self.Operation3 = MDDropdownMenu(
+            caller=instance,
+            items=Items,
+            width_mult=3,
+        )
+        
+        instance.icon = "close"
+        self.Operation3.open()
+    
+    def Faire_Icon_4(self, instance,x):
+        """
+        calling_button: Le bouton qui a ouvert le menu
+        menu_item: L'item du menu qui a été cliqué
+        selected_text: Le texte de l'item sélectionné
+        """
+        #x = selected_text  # ou menu_item.text si vous préférez
+        
+        dic = {
+            self.Liste[0]: self.Changer_language,
+            self.Liste[1]: self.Help,
+            self.Liste[2]: self.Changer_font1,
+            self.Liste[3]: self.Changer_font2,
+            self.Liste[4]:self.Changer_show_page4,
+        }
+        
+        func = dic.get(x)
+        if func is not None:
+            func(instance)  # Passer le bouton original
+    
+        # Fermer le menu et remettre l'icône
+        self.Operation3.dismiss()
+        self.INSTANCE.icon = "plus"
+
     def Afficher_moi_les_infos_en_card(self,Lieu,data):
         Lieu.orientation =  'vertical'
         Lieu.padding="16dp"
@@ -1023,6 +1008,7 @@ class BCC(MDApp):
         column_data = [
             ("ID", dp(20)),
             ("Date", dp(30)),
+            ("Heur", dp(30)),
             ("Opérateur", dp(30)),
             ("O/F/DD", dp(20)),
             ("Opération", dp(50)),

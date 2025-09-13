@@ -1,26 +1,144 @@
-name: Build
+name: Build Android APK
+
 on:
   push:
+    branches: [ main, master, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Permet de déclencher manuellement
 
 jobs:
-  # Build job. Builds app for Android with Buildozer
-  build-android:
-    name: Build for Android
+  build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          git \
+          ffmpeg \
+          libsdl2-dev \
+          libsdl2-image-dev \
+          libsdl2-mixer-dev \
+          libsdl2-ttf-dev \
+          libportmidi-dev \
+          libswscale-dev \
+          libavformat-dev \
+          libavcodec-dev \
+          zlib1g-dev \
+          libgstreamer1.0-0 \
+          gstreamer1.0-plugins-base \
+          gstreamer1.0-plugins-good \
+          autotools-dev \
+          autoconf \
+          libtool \
+          pkg-config \
+          libffi-dev \
+          libssl-dev \
+          openjdk-17-jdk \
+          unzip
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          workdir: .
-          buildozer_version: stable
+    - name: Set up Java environment
+      run: |
+        echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+        echo "PATH=$PATH:/usr/lib/jvm/java-17-openjdk-amd64/bin" >> $GITHUB_ENV
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: ${{ steps.buildozer.outputs.filename }}
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython==0.29.33
+
+    - name: Cache Android SDK and NDK
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.android
+          ~/.buildozer/android
+        key: ${{ runner.os }}-android-sdk-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-android-sdk-
+
+    - name: Setup Android SDK
+      run: |
+        # Créer le répertoire Android SDK
+        mkdir -p ~/.android
+        
+        # Configuration initiale de buildozer
+        buildozer android clean || true
+
+    - name: Accept Android SDK licenses
+      run: |
+        # Accepter automatiquement les licences Android
+        mkdir -p ~/.android/
+        echo 'count=0' > ~/.android/repositories.cfg
+        
+        # Créer un script pour accepter les licences
+        yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+    - name: Build APK
+      run: |
+        # Configuration de l'environnement
+        export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
+        export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
+        export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
+        
+        # Vérifier les fichiers requis
+        ls -la
+        
+        # Build l'APK
+        buildozer android debug
+        
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: BCC-Control-${{ github.sha }}
+        path: bin/*.apk
+        retention-days: 30
+        
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: bin/*.apk
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job optionnel pour tester la syntaxe Python
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # Arrêter sur les erreurs de syntaxe ou les noms non définis
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Traiter tous les autres comme des avertissements
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
